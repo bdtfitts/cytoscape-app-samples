@@ -1,8 +1,17 @@
 package edu.ucsf.rbvi.myapp.internal;
 
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
-
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.work.ServiceProperties;
+import java.util.Properties;
 /**
  * {@code CyActivator} is a class that is a starting point for OSGi bundles.
  * 
@@ -36,5 +45,20 @@ public class CyActivator extends AbstractCyActivator {
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
+		Properties props = new Properties();
+		CyNetworkFactory cnf = getService(context, CyNetworkFactory.class);
+		CyNetworkManager cnm = getService(context, CyNetworkManager.class);
+		CyNetworkViewFactory cnvf = getService(context, CyNetworkViewFactory.class);
+		CyNetworkViewManager cnvm = getService(context, CyNetworkViewManager.class);
+		VisualMappingManager vmm = getService(context, VisualMappingManager.class);
+		VisualStyleFactory vsf = getService(context, VisualStyleFactory.class);
+		VisualMappingFunctionFactory vmff = getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
+		MyTaskFactory myFactory = new MyTaskFactory(cnf, cnm, cnvf, cnvm, vmm, vsf, vmff);
+		props.setProperty(ServiceProperties.PREFERRED_MENU, "Apps.myApp");
+		props.setProperty(ServiceProperties.TITLE, "Hello World");
+		props.setProperty(ServiceProperties.IN_MENU_BAR, "true");
+		props.setProperty(ServiceProperties.COMMAND_NAMESPACE, "myapp");
+		props.setProperty(ServiceProperties.COMMAND, "execute");
+		registerService(context, myFactory, TaskFactory.class, props);
 	}
 }
